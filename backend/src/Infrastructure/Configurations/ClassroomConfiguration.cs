@@ -13,12 +13,7 @@ public class ClassroomConfiguration : IEntityTypeConfiguration<Classroom>
 
         b.Property(x => x.Name).HasMaxLength(200).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();
-
-        // Relações
-        b.HasOne(x => x.Tenant)
-         .WithMany()
-         .HasForeignKey(x => x.TenantId)
-         .OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.TenantId).IsRequired();
 
         b.HasOne(x => x.Teacher)
          .WithMany()

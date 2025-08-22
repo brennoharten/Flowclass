@@ -23,7 +23,6 @@ public class AppDbContext : DbContext
         // snake_case (bom pra Postgres)
         modelBuilder.UseSerialColumns(); // usa identity/serial conforme provedor
         modelBuilder.HasPostgresExtension("uuid-ossp");
-        modelBuilder.UseSnakeCaseNamingConvention();
 
         // Aplicar configurações por assembly (IEntityTypeConfiguration<>)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

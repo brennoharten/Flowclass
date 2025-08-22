@@ -14,12 +14,7 @@ public class LessonConfiguration : IEntityTypeConfiguration<Lesson>
         b.Property(x => x.StartTime).IsRequired();
         b.Property(x => x.EndTime).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();
-
-        // Relações
-        b.HasOne(x => x.Tenant)
-         .WithMany()
-         .HasForeignKey(x => x.TenantId)
-         .OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.TenantId).IsRequired();
 
         b.HasOne(x => x.Classroom)
          .WithMany(c => c.Lessons)

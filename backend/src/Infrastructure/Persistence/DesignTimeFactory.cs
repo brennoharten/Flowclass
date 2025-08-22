@@ -28,6 +28,7 @@ public class DesignTimeFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         public StaticTenantProvider(Guid id) => CurrentTenantId = id;
         public Guid CurrentTenantId { get; }
+        public void Set(Guid tenantId) { /* ignorado no design-time */ }
     }
 }
 

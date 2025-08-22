@@ -13,12 +13,7 @@ public class AttendanceConfiguration : IEntityTypeConfiguration<Attendance>
 
         b.Property(x => x.Status).HasConversion<int>().IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();
-
-        // Relações
-        b.HasOne(x => x.Tenant)
-         .WithMany()
-         .HasForeignKey(x => x.TenantId)
-         .OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.TenantId).IsRequired();
 
         b.HasOne(x => x.Lesson)
          .WithMany(l => l.Attendances)
