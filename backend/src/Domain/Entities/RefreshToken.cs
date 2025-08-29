@@ -22,4 +22,5 @@ public class RefreshToken : BaseEntity
         Token = token;
         ExpiresAt = expiresAt;
     }
+    public void Revoke() => RevokedAt = DateTime.UtcNow;
 }

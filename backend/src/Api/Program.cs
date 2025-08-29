@@ -1,11 +1,15 @@
 using Infrastructure.Persistence;
 using Infrastructure.Tenancy;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql.EntityFrameworkCore.PostgreSQL; // necessário para UseSnakeCaseNamingConvention
 using System.Text;
 using Application;
+using Application.Common.Interfaces;
+using Infrastructure.Repositories;
+using Infrastructure.Security;
+using Infrastructure.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // TenantProvider: 1 por requisição
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+// Repos
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+
+// Serviços
+builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -64,7 +78,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Middleware Tenant: pega X-Tenant-Id do header
+// Middleware Tenant
 app.Use(async (ctx, next) =>
 {
     var tenantProvider = ctx.RequestServices.GetRequiredService<ITenantProvider>();
@@ -78,4 +92,33 @@ app.Use(async (ctx, next) =>
 
 app.MapControllers();
 
+// ===== Seed antes de rodar a aplicação =====
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+    await SeedDataAsync(db, hasher);
+}
+
 app.Run();
+
+// ===== Método Seed =====
+async Task SeedDataAsync(AppDbContext db, IPasswordHasher hasher)
+{
+    if (!await db.Tenants.AnyAsync())
+    {
+        var tenant = new Tenant("Default Tenant");
+        await db.Tenants.AddAsync(tenant);
+
+        var admin = new User(
+            tenant.Id,
+            "admin@admin.com",
+            hasher.Hash("1234"),
+            "Admin",
+            UserRole.Admin
+        );
+        await db.Users.AddAsync(admin);
+
+        await db.SaveChangesAsync();
+    }
+}

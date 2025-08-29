@@ -13,10 +13,12 @@ public class AppDbContext : DbContext
         => _tenant = tenant;
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<Tenant> Tenants { get; set; } = null!;
+
     public DbSet<Classroom> Classrooms => Set<Classroom>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +28,17 @@ public class AppDbContext : DbContext
 
         // Aplicar configurações por assembly (IEntityTypeConfiguration<>)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        modelBuilder.Entity<RefreshToken>(eb =>
+        {
+            eb.HasKey(r => r.Id);
+            eb.Property(r => r.Token).IsRequired().HasMaxLength(200);
+            eb.HasIndex(r => r.Token).IsUnique();
+            eb.HasOne(r => r.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        });
 
         // Filtro global de tenant (para entidades que implementam ITenantScoped)
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
