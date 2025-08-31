@@ -1,4 +1,4 @@
-namespace Application.Scheduling.Dtos;
+namespace Application.Lessons.Dtos;
 
 public record ScheduleLessonRequest(Guid ClassroomId, DateTime StartTimeUtc, DateTime EndTimeUtc);
 public record LessonDto(Guid Id, Guid ClassroomId, DateTime Start, DateTime End);

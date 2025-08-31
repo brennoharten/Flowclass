@@ -1,6 +1,6 @@
 using MediatR;
-using Application.Scheduling.Dtos;
+using Application.Lessons.Dtos;
 
-namespace Application.Scheduling;
+namespace Application.Lessons.Queries;
 public record ListLessonsQuery(Guid TenantId, ListLessonsRequest Request) : IRequest<ListLessonsResponse>;
 

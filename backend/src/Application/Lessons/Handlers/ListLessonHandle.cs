@@ -1,8 +1,9 @@
 using MediatR;
-using Application.Scheduling.Dtos;
+using Application.Lessons.Dtos;
 using Application.Common.Interfaces;
+using Application.Lessons.Queries;
 
-namespace Application.Scheduling;
+namespace Application.Lessons.Handlers;
 
 public class ListLessonsHandler : IRequestHandler<ListLessonsQuery, ListLessonsResponse>
 {

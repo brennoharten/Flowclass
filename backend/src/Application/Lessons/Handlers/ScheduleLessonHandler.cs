@@ -1,9 +1,10 @@
 using MediatR;
-using Application.Scheduling.Dtos;
+using Application.Lessons.Dtos;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Application.Lessons.Commands;
 
-namespace Application.Scheduling;
+namespace Application.Lessons.Handlers;
 
 public class ScheduleLessonHandler : IRequestHandler<ScheduleLessonCommand, LessonDto>
 {
