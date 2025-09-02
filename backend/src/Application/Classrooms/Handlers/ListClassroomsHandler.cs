@@ -1,6 +1,7 @@
 using MediatR;
 using Application.Classrooms.Dtos;
 using Application.Common.Interfaces;
+using Application.Common.Interfaces.Repositories;
 
 namespace Application.Classrooms;
 

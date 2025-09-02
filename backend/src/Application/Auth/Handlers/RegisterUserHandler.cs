@@ -2,39 +2,55 @@ using MediatR;
 using Application.Auth.Dtos;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Application.Common.Interfaces.Repositories;
+
 
 namespace Application.Auth;
 
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResponse>
 {
     private readonly IUserRepository _users;
-    private readonly IPasswordHasher _hasher;
+    private readonly ITenantRepository _tenants;
     private readonly IJwtTokenService _jwt;
+    private readonly IPasswordHasher _hasher;
 
-    public RegisterUserHandler(IUserRepository users, IPasswordHasher hasher, IJwtTokenService jwt)
-        => (_users, _hasher, _jwt) = (users, hasher, jwt);
+    public RegisterUserHandler(IUserRepository users, ITenantRepository tenants, IJwtTokenService jwt, IPasswordHasher hasher)
+        => (_users, _tenants, _jwt, _hasher) = (users, tenants, jwt, hasher);
 
     public async Task<AuthResponse> Handle(RegisterUserCommand cmd, CancellationToken ct)
     {
         var req = cmd.Request;
 
-        var exists = await _users.GetByEmailAsync(cmd.TenantId, req.Email, ct);
-        if (exists is not null) throw new InvalidOperationException("Email já cadastrado.");
+        Guid tenantId;
 
-        var hash = _hasher.Hash(req.Password);
-        var role = (UserRole)req.Role;
+        if (req.Role == (int)UserRole.Teacher)
+        {
+            var tenant = new Tenant(req.AcademyName);
+            await _tenants.AddAsync(tenant, ct);
+            tenantId = tenant.Id;
+        }
 
-        var user = new User(cmd.TenantId, req.Email, hash, req.Name, role);
+        else
+        {
+            tenantId = req.TenantId ?? throw new Exception("TenantId obrigatório para aluno");
+        }
+
+        var user = new User(
+            tenantId,
+            req.Email,
+            _hasher.Hash(req.Password),
+            req.Name,
+            (UserRole)req.Role
+        );
+
+
         await _users.AddAsync(user, ct);
 
-        var access = _jwt.CreateAccessToken(user);
-        var refreshStr = _jwt.CreateRefreshToken();
-        var refresh = new RefreshToken(user.Id, refreshStr, DateTime.UtcNow.AddDays(30));
-        await _users.AddRefreshTokenAsync(refresh, ct);
+        var token = _jwt.CreateAccessToken(user);
 
-        await _users.SaveChangesAsync(ct);
-
-        return new AuthResponse(user.Id, user.Name, user.Email, access, refreshStr);
+        return new AuthResponse(user.Id, user.Name, user.Email, req.Role.ToString(), token);
     }
 }
+
+
 

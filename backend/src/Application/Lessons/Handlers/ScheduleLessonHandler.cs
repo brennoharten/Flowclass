@@ -3,18 +3,19 @@ using Application.Lessons.Dtos;
 using Application.Common.Interfaces;
 using Domain.Entities;
 using Application.Lessons.Commands;
+using Application.Common.Interfaces.Repositories;
 
 namespace Application.Lessons.Handlers;
 
-public class ScheduleLessonHandler : IRequestHandler<ScheduleLessonCommand, LessonDto>
+public class CreateLessonHandler : IRequestHandler<CreateLessonCommand, LessonDto>
 {
     private readonly ILessonRepository _lessons;
     private readonly IClassroomRepository _classrooms;
 
-    public ScheduleLessonHandler(ILessonRepository lessons, IClassroomRepository classrooms)
+    public CreateLessonHandler(ILessonRepository lessons, IClassroomRepository classrooms)
         => (_lessons, _classrooms) = (lessons, classrooms);
 
-    public async Task<LessonDto> Handle(ScheduleLessonCommand cmd, CancellationToken ct)
+    public async Task<LessonDto> Handle(CreateLessonCommand cmd, CancellationToken ct)
     {
         var r = cmd.Request;
         if (r.EndTimeUtc <= r.StartTimeUtc) throw new InvalidOperationException("Horário inválido.");

@@ -1,14 +1,28 @@
-// src/lib/api.ts
-import axios from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getAccessToken, getRefreshToken, setAccessToken } from "./auth";
 import { refresh } from "@/api/auth";
+
+interface FailedQueueItem {
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}
+
+let isRefreshing = false;
+let failedQueue: FailedQueueItem[] = [];
+
+function processQueue(error: unknown, token: string | null = null) {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else if (token) prom.resolve(token);
+  });
+  failedQueue = [];
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
   withCredentials: true,
 });
 
-// 🔹 Interceptor para incluir o token em cada request
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token && config.headers) {
@@ -17,30 +31,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🔹 Interceptor para refresh automático
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-function processQueue(error: any, token: string | null = null) {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-}
-
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  (response: AxiosResponse) => response,
+  async (error: AxiosError & { config: AxiosRequestConfig & { _retry?: boolean } }) => {
     const originalRequest = error.config;
 
-    // Se o token expirou
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
@@ -61,8 +59,8 @@ api.interceptors.response.use(
 
         const res = await refresh(refreshToken);
         const newAccessToken = res.data.accessToken;
-        setAccessToken(newAccessToken);
 
+        setAccessToken(newAccessToken);
         processQueue(null, newAccessToken);
 
         if (originalRequest.headers) {

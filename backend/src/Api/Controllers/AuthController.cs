@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest req, CancellationToken ct)
     {
-        var res = await _mediator.Send(new RegisterUserCommand(_tenant.CurrentTenantId, req), ct);
+        var res = await _mediator.Send(new RegisterUserCommand(req), ct);
         return Ok(res);
     }
 
@@ -40,5 +40,13 @@ public class AuthController : ControllerBase
         var res = await _mediator.Send(new RefreshCommand(_tenant.CurrentTenantId, req), ct);
         return Ok(res);
     }
+    //rever
+    /* [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        await _mediator.Send(new LogoutCommand(User.Identity!.Name!), ct);
+        return Ok();
+    } */
 }
 

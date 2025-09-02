@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("lessons")]
+[Route("classrooms/{classroomId}/lessons")]
 [Authorize]
 public class LessonsController : ControllerBase
 {
@@ -21,17 +21,17 @@ public class LessonsController : ControllerBase
         => (_mediator, _tenant) = (mediator, tenant);
 
     [HttpPost]
-    public async Task<IActionResult> Schedule([FromBody] ScheduleLessonRequest req, CancellationToken ct)
+    [Authorize(Roles = "Professor")]
+    public async Task<IActionResult> Create([FromBody] CreateLessonRequest req, CancellationToken ct)
     {
-        var res = await _mediator.Send(new ScheduleLessonCommand(_tenant.CurrentTenantId, req), ct);
+        var res = await _mediator.Send(new CreateLessonCommand(_tenant.CurrentTenantId, req), ct);
         return Ok(res);
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] DateTime fromUtc, [FromQuery] DateTime toUtc, CancellationToken ct)
+    public async Task<IActionResult> List(ListLessonsRequest req, CancellationToken ct)
     {
-        var res = await _mediator.Send(new ListLessonsQuery(_tenant.CurrentTenantId, new ListLessonsRequest(fromUtc, toUtc)), ct);
+        var res = await _mediator.Send(new ListLessonsQuery(_tenant.CurrentTenantId, req), ct);
         return Ok(res);
     }
 }
-

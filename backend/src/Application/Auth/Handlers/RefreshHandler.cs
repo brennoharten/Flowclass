@@ -2,6 +2,7 @@ using MediatR;
 using Application.Auth.Dtos;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Application.Common.Interfaces.Repositories;
 
 namespace Application.Auth;
 

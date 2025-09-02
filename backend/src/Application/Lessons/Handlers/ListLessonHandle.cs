@@ -2,6 +2,7 @@ using MediatR;
 using Application.Lessons.Dtos;
 using Application.Common.Interfaces;
 using Application.Lessons.Queries;
+using Application.Common.Interfaces.Repositories;
 
 namespace Application.Lessons.Handlers;
 

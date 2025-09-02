@@ -10,6 +10,8 @@ using Application.Common.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
 using Infrastructure.Mail;
+using Infrastructure.Identity;
+using Application.Common.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,10 @@ builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+// no bloco de services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
+
 
 // Serviços
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();

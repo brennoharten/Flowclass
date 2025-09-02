@@ -19,6 +19,7 @@ public class ClassroomsController : ControllerBase
         => (_mediator, _tenant) = (mediator, tenant);
 
     [HttpPost]
+    [Authorize(Roles = "Professor")]
     public async Task<IActionResult> Create([FromBody] CreateClassroomRequest req, CancellationToken ct)
     {
         var res = await _mediator.Send(new CreateClassroomCommand(_tenant.CurrentTenantId, req), ct);

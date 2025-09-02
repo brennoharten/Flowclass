@@ -3,4 +3,5 @@ using Application.Attendance.Dtos;
 
 namespace Application.Attendance.Queries;
 
-public record ListAttendanceQuery(Guid TenantId, ListAttendancesRequest Request) : IRequest<ListAttendancesResponse>;
+public record ListAttendanceQuery(Guid TenantId, Guid LessonId) 
+    : IRequest<IReadOnlyList<AttendanceDto>>;

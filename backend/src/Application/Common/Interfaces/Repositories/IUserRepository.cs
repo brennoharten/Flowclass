@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-namespace Application.Common.Interfaces;
+namespace Application.Common.Interfaces.Repositories;
 public interface IUserRepository
 {
     Task<User?> GetByEmailAsync(Guid tenantId, string email, CancellationToken ct);
