@@ -1,4 +1,4 @@
-// src/app/dashboard/professor/page.tsx
+// src/app/dashboard/aluno/page.tsx
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
@@ -7,14 +7,13 @@ import Link from "next/link";
 type Class = {
   id: string;
   name: string;
-  schedule: string;
 };
 
-export default function ProfessorDashboard() {
+export default function AlunoDashboard() {
   const { data, isLoading, error } = useQuery<Class[]>({
-    queryKey: ["classes"],
+    queryKey: ["myClasses"],
     queryFn: async () => {
-      const res = await api.get("/classes/mine");
+      const res = await api.get("/students/classes");
       return res.data;
     },
   });
@@ -28,8 +27,8 @@ export default function ProfessorDashboard() {
       <ul className="space-y-2 mt-4">
         {data?.map((cls) => (
           <li key={cls.id} className="p-4 border rounded-lg">
-            <Link href={`/dashboard/professor/classes/${cls.id}`}>
-              {cls.name} — {cls.schedule}
+            <Link href={`/dashboard/aluno/classes/${cls.id}`}>
+              {cls.name}
             </Link>
           </li>
         ))}
